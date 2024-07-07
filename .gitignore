@@ -1,0 +1,4 @@
+node_modules
+dcd-openmusic-api.pem
+.env
+.prod.env
