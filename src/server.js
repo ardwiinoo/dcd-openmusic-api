@@ -5,19 +5,23 @@ const { ClientError } = require('./exceptions')
 
 // plugin
 const albums = require('./api/albums')
+const songs = require('./api/songs')
 
 // service
 const AlbumsService = require('./services/postgres/AlbumsService')
+const SongsService = require('./services/postgres/SongsService')
 
 // utility
 const config = require('./utils/config')
-const { handleClientError, handleServerError } = require('./utils/responses')
+const { onClientErrorResponse, onServerErrorResponse } = require('./utils/responses')
 
 // validator
 const AlbumsValidator = require('./validator/albums')
+const SongsValidator = require('./validator/songs')
 
 const init = async () => {
-    const albumsService = new AlbumsService()
+    const songsService = new SongsService()
+    const albumsService = new AlbumsService(songsService)
 
     const server = Hapi.server({
         port: config.app.port,
@@ -36,6 +40,13 @@ const init = async () => {
                 service: albumsService,
                 validator: AlbumsValidator,
             }
+        },
+        {
+            plugin: songs,
+            options: {
+                service: songsService,
+                validator: SongsValidator
+            }
         }
     ])
 
@@ -44,9 +55,9 @@ const init = async () => {
 
         if (response instanceof Error) {
             if (response instanceof ClientError) {
-                return handleClientError(response, h);
+                return onClientErrorResponse(response, h);
             } else {
-                return handleServerError(response, h);
+                return onServerErrorResponse(response, h);
             }
         }
 
