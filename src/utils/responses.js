@@ -1,5 +1,5 @@
-const handleServerError = (error, h) => {
-    console.error('Internal Server Error:', error);
+const onServerErrorResponse = (error, h) => {
+    console.error('Internal Server Error - ', error);
 
     return h.response({
         status: 'error',
@@ -7,14 +7,14 @@ const handleServerError = (error, h) => {
     }).code(500)
 };
 
-const handleClientError = (error, h) => {
+const onClientErrorResponse = (error, h) => {
     return h.response({
         status: 'fail',
         message: error.message
     }).code(error.statusCode);
 }
 
-const handleSuccess = (h, {data = undefined, message = undefined, statusCode = 200}) => {
+const onSuccessResponse = (h, {data = undefined, message = undefined, statusCode = 200}) => {
     return h.response({
         status: 'success',
         message,
@@ -23,7 +23,7 @@ const handleSuccess = (h, {data = undefined, message = undefined, statusCode = 2
 }
 
 module.exports = {
-    handleClientError,
-    handleServerError,
-    handleSuccess
+    onServerErrorResponse,
+    onClientErrorResponse,
+    onSuccessResponse
 }
