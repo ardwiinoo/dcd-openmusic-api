@@ -17,13 +17,13 @@ class AlbumsService {
             values: [id, name, year]
         }
 
-        const result = await this._pool.query(query)
+        const { rows, rowCount } = await this._pool.query(query)
 
-        if (!result.rowCount) {
+        if (!rowCount) {
             throw new InvariantError('Album gagal ditambahkan')
         }
 
-        return result.rows[0].id
+        return rows[0].id
     }
 
     async getAlbumById(id) {
@@ -32,16 +32,16 @@ class AlbumsService {
             values: [id]
         }
 
-        const result = await this._pool.query(query)
+    const { rows, rowCount } = await this._pool.query(query)
 
-        if (!result.rowCount) {
+        if (!rowCount) {
             throw new NotFoundError('Album tidak ditemukan')
         }
 
         let album = {
-            id: result.rows[0].id,
-            name: result.rows[0].name,
-            year: result.rows[0].year,
+            id: rows[0].id,
+            name: rows[0].name,
+            year: rows[0].year,
             songs: []
         }
         
@@ -62,9 +62,9 @@ class AlbumsService {
             values: [name, year, updateAt, id]
         } 
 
-        const result = await this._pool.query(query)
+        const { rowCount } = await this._pool.query(query)
 
-        if (!result.rowCount) {
+        if (!rowCount) {
             throw new NotFoundError('Gagal memperbarui, Id album tidak ditemukan')
         }
     }
@@ -75,9 +75,9 @@ class AlbumsService {
             values: [id]
         }
 
-        const result = await this._pool.query(query)
+        const { rowCount } = await this._pool.query(query)
 
-        if (!result.rowCount) {
+        if (!rowCount) {
             throw new NotFoundError('Gagal menghapus, Id album tidak ditemukan')
         }
     }

@@ -16,13 +16,13 @@ class SongsService {
             values: [id, title, year, genre, performer, duration, albumId]
         }
 
-        const result = await this._pool.query(query)
-
-        if (!result.rowCount) {
+        const { rows, rowCount } = await this._pool.query(query)
+        
+        if (!rowCount) {
             throw new InvariantError('Song gagal ditambahkan')
         }
 
-        return result.rows[0].id 
+        return rows[0].id
     }
 
     async getSongList(title = '', performer = '') {
@@ -31,17 +31,13 @@ class SongsService {
             values: [`%${title}%`, `%${performer}%`]
         }
 
-        const result = await this._pool.query(query)
-
-         if (!result.rowCount) {
+        const { rows, rowCount } = await this._pool.query(query)
+        
+        if (!rowCount) {
             throw new NotFoundError('Song tidak ditemukan')
         }
 
-        return result.rows.map((song) => ({
-            id: song.id,
-            title: song.title,
-            performer: song.performer
-        }))
+        return rows
     }
 
     async getSongById(id) {
@@ -50,20 +46,20 @@ class SongsService {
             values: [id]
         }
 
-        const result = await this._pool.query(query)
+        const { rows, rowCount } = await this._pool.query(query)
 
-         if (!result.rowCount) {
+        if (!rowCount) {
             throw new NotFoundError('Song tidak ditemukan')
         }
 
         return {
-            id: result.rows[0].id,
-            title: result.rows[0].title,
-            year: result.rows[0].year,
-            performer: result.rows[0].performer,
-            genre: result.rows[0].genre,
-            duration: result.rows[0].duration,
-            albumId: result.rows[0].album_id,
+            id: rows[0].id,
+            title: rows[0].title,
+            year: rows[0].year,
+            performer: rows[0].performer,
+            genre: rows[0].genre,
+            duration: rows[0].duration,
+            albumId: rows[0].album_id,
         }
     }
 
@@ -76,9 +72,9 @@ class SongsService {
             values: [title, year, genre, performer, duration, albumId, updateAt, id]
         } 
 
-        const result = await this._pool.query(query)
+        const { rowCount } = await this._pool.query(query)
 
-        if (!result.rowCount) {
+        if (!rowCount) {
             throw new NotFoundError('Gagal memperbarui, Id song tidak ditemukan')
         }
     }
@@ -89,9 +85,9 @@ class SongsService {
             values: [id]
         }
 
-        const result = await this._pool.query(query)
+        const { rowCount } = await this._pool.query(query)
 
-        if (!result.rowCount) {
+        if (!rowCount) {
             throw new NotFoundError('Gagal menghapus, Id song tidak ditemukan')
         }
     }
@@ -102,17 +98,13 @@ class SongsService {
             values: [albumId],
         };
 
-        const resultSongs = await this._pool.query(query);
+        const { rows, rowCount } = await this._pool.query(query);
 
-        if (!resultSongs.rowCount) {
+        if (!rowCount) {
             throw new NotFoundError('Songs tidak ditemukan');
         }
 
-        return resultSongs.rows.map(song => ({
-            id: song.id,
-            title: song.title,
-            performer: song.performer
-        }))
+        return rows
     }
 }
 
