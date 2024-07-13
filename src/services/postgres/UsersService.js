@@ -1,7 +1,7 @@
 const { Pool } = require('pg')
-const { InvariantError } = require('../../exceptions')
+const { InvariantError, AuthenticationError } = require('../../exceptions')
 const { nanoid } = require('nanoid')
-const { hashPassword } = require('../../utils/hash')
+const { hashPassword, comparePassword } = require('../../utils/hash')
 
 class UsersService {
     constructor() {
@@ -40,6 +40,30 @@ class UsersService {
         if (rowCount > 0) {
             throw new InvariantError('User gagal ditambahkan. username sudah digunakan')
         }
+    }
+
+    async verifyUserCredentials(payload) {
+        const { username, password } = payload
+
+        const query = {
+            text: 'SELECT id, password FROM users WHERE username = $1',
+            values: [username]
+        }
+
+        const { rows, rowCount } = await this._pool.query(query)
+        
+        if (!rowCount) {
+            throw new AuthenticationError('Gagal authentikasi, kredensial salah')
+        }
+
+        const user = rows[0]
+        const match = await comparePassword(password, user.password);
+ 
+        if (!match) {
+            throw new AuthenticationError('Gagal authentikasi, kredensial salah')
+        }
+
+        return user.id
     }
 }
 
