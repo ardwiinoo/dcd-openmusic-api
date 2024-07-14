@@ -5,14 +5,15 @@ const config = require('../utils/config')
 const TokenManager = {
     generateAccessToken: (payload) => Jwt.token.generate(payload, config.security.jwt.accessTokenKey),
     generateRefreshToken: (payload) => Jwt.token.generate(payload, config.security.jwt.refreshTokenKey),
-    verifyRefreshToken: (refreshToken) => {
+    verifyRefreshToken: (payload) => {
         try {
+            const { refreshToken } = payload
             const artifacts = Jwt.token.decode(refreshToken)
             
             Jwt.token.verifySignature(artifacts, config.security.jwt.refreshTokenKey)
-            const { payload } = artifacts.decoded
+            const { payload: decodedPayload } = artifacts.decoded
 
-            return payload
+            return decodedPayload
         } catch {
             throw new InvariantError('Refresh token tidak valid')
         }

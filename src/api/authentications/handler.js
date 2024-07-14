@@ -21,13 +21,30 @@ class AuthenticationsHandler {
         return onSuccessResponse(h, { data: { accessToken, refreshToken }, statusCode: 201 })
     }    
 
+    async putAuthHandler(request, h) {
+        this._validator.validatePutAuthPayload(request.payload)
+        await this._authenticationsService.verifyRefreshToken(request.payload)
+
+        const { id } = this._tokenManager.verifyRefreshToken(request.payload)
+        const { accessToken } = this._generateJwtToken(id)
+
+        return onSuccessResponse(h, { data: { accessToken } })
+    }
+
+    async deleteAuthHandler(request, h) {
+        this._validator.validateDeleteAuthPayload(request.payload)
+        await this._authenticationsService.verifyRefreshToken(request.payload)
+        await this._authenticationsService.deleteRefreshToken(request.payload)
+
+        return onSuccessResponse(h, { message: 'Refresh token berhasil dihapus'})
+    }
+
     _generateJwtToken(id) {
         return {
             accessToken: this._tokenManager.generateAccessToken({ id }),
             refreshToken: this._tokenManager.generateRefreshToken({ id }),
         }
     }
-
 }
 
 module.exports = AuthenticationsHandler
