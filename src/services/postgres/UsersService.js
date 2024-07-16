@@ -1,5 +1,5 @@
 const { Pool } = require('pg')
-const { InvariantError, AuthenticationError } = require('../../exceptions')
+const { InvariantError, AuthenticationError, NotFoundError } = require('../../exceptions')
 const { nanoid } = require('nanoid')
 const { hashPassword, comparePassword } = require('../../utils/hash')
 
@@ -64,6 +64,21 @@ class UsersService {
         }
 
         return user.id
+    }
+
+    async getUserById(id) {
+        const query = {
+            text: 'SELECT * FROM users WHERE id = $1',
+            values: [id],
+        }
+
+        const { rows, rowCount } = await this._pool.query(query);
+
+        if (!rowCount) {
+            throw new NotFoundError('User tidak ditemukan');
+        }
+
+        return rows[0]
     }
 }
 
