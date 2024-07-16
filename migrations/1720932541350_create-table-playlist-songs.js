@@ -15,13 +15,11 @@ exports.up = (pgm) => {
         },
         playlist_id: {
             type: 'VARCHAR(50)',
-            notNull: true,
-            unique: true
+            notNull: true
         },
         song_id: {
             type: 'VARCHAR(50)',
-            notNull: true,
-            unique: true
+            notNull: true
         },
         created_at: {
             type: 'TIMESTAMP',
@@ -34,6 +32,12 @@ exports.up = (pgm) => {
             default: pgm.func('current_timestamp')
         },
     })
+
+    pgm.addConstraint(
+        'playlist_songs',
+        'unique_playlist_id_and_song_id',
+        'UNIQUE(playlist_id, song_id)'
+    )
 
     pgm.addConstraint(
         'playlist_songs',
