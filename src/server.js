@@ -2,12 +2,14 @@ const Hapi = require('@hapi/hapi')
 const Jwt = require('@hapi/jwt')
 
 // exception
-const { ClientError } = require('./exceptions')
+const { ClientError, AuthenticationError } = require('./exceptions')
 
 // plugin
 const { 
     albums, 
     authentications,
+    collaborations,
+    playlists,
     songs,
     users
 } = require('./api') 
@@ -16,8 +18,10 @@ const {
 const { 
     AlbumsService,
     AuthenticationsService,
+    CollaborationsService,
+    PlaylistsService,
     SongsService,
-    UsersService 
+    UsersService, 
 } = require('./services/postgres') 
 
 // utility
@@ -31,6 +35,8 @@ const TokenManager = require('./tokenize/TokenManager')
 const { 
     AlbumsValidator,
     AuthenticationsValidator,
+    CollaborationsValidator,
+    PlaylistsValidator,
     SongsValidator,
     UsersValidator
 } = require('./validator')
@@ -40,6 +46,8 @@ const init = async () => {
     const albumsService = new AlbumsService(songsService)
     const usersService = new UsersService()
     const authenticationsService = new AuthenticationsService()
+    const collaborationsService = new CollaborationsService(usersService)
+    const playlistsService = new PlaylistsService(collaborationsService, songsService)
 
     const server = Hapi.server({
         port: config.app.port,
@@ -104,11 +112,35 @@ const init = async () => {
                 tokenManager: TokenManager,
                 validator: AuthenticationsValidator
             }
-        }
+        },
+                {
+            plugin: collaborations,
+            options: {
+                collaborationsService: collaborationsService,
+                playlistsService: playlistsService,
+                validator: CollaborationsValidator
+            }
+        },
+        {
+            plugin: playlists,
+            options: {
+                service: playlistsService,
+                validator: PlaylistsValidator
+            }
+        },
     ])
 
     server.ext('onPreResponse', (request, h) => {
         const { response } = request
+
+        if (response.isBoom) {
+            const { statusCode } = response.output
+
+            if (statusCode === 401 || statusCode === 403) {
+                const customError = new AuthenticationError('Anda harus login untuk mengakses resource ini')
+                return onClientErrorResponse(customError, h)
+            }
+        }
 
         if (response instanceof Error) {
             if (response instanceof ClientError) {
