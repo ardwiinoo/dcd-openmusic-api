@@ -14,6 +14,12 @@ const config = {
             refreshTokenKey: process.env.REFRESH_TOKEN_KEY,
             accessTokenAgeSec: process.env.ACCESS_TOKEN_AGE
         }
+    },
+    rabbitMq: {
+        server: process.env.RABBITMQ_SERVER
+    },
+    redis: {
+        host: process.env.REDIS_SERVER
     }
 }
 
