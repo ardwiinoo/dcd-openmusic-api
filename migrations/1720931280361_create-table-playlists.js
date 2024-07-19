@@ -46,5 +46,5 @@ exports.up = (pgm) => {
  * @returns {Promise<void> | void}
  */
 exports.down = (pgm) => {
-    pgm.dropColumn('playlists')
+    pgm.dropTable('playlists')
 };
