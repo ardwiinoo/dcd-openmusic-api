@@ -32,7 +32,7 @@ class AlbumsService {
             values: [id]
         }
 
-    const { rows, rowCount } = await this._pool.query(query)
+        const { rows, rowCount } = await this._pool.query(query)
 
         if (!rowCount) {
             throw new NotFoundError('Album tidak ditemukan')
@@ -42,6 +42,7 @@ class AlbumsService {
             id: rows[0].id,
             name: rows[0].name,
             year: rows[0].year,
+            coverUrl: rows[0].cover,
             songs: []
         }
         
@@ -79,6 +80,21 @@ class AlbumsService {
 
         if (!rowCount) {
             throw new NotFoundError('Gagal menghapus, Id album tidak ditemukan')
+        }
+    }
+
+    async updateAlbumCoverImage(id, path) {
+        const updateAt = new Date()
+
+        const query = {
+            text: 'UPDATE albums SET cover = $1, updated_at = $2 WHERE id = $3 RETURNING id',
+            values: [path, updateAt, id]
+        }
+
+        const { rowCount } = await this._pool.query(query)
+
+        if (!rowCount) {
+            throw new NotFoundError('Gagal memperbarui, Id album tidak ditemukan')
         }
     }
 }

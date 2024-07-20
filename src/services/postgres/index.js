@@ -1,5 +1,6 @@
 module.exports = {
     AlbumsService: require('./AlbumsService'),
+    AlbumLikesService: require('./AlbumLikesService'),
     AuthenticationsService: require('./AuthenticationsService'),
     CollaborationsService: require('./CollaborationsService'),
     PlaylistsService: require('./PlaylistsService'),
